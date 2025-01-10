@@ -8,6 +8,7 @@
 AuxiliaryArticalUploadTool/
 ├── CMakeLists.txt          # CMake 构建配置文件
 ├── README.md               # 项目说明文档
+├── build.sh               # 自动构建脚本
 ├── src/                    # 源代码目录
 │   ├── main.cpp           # 主程序入口
 │   ├── mainwindow.cpp     # 主窗口实现
@@ -17,6 +18,9 @@ AuxiliaryArticalUploadTool/
 │   │   ├── editorwindow.h
 │   │   ├── markdownpreview.cpp
 │   │   └── markdownpreview.h
+│   ├── resources/         # 资源文件目录
+│   │   ├── resources.qrc
+│   │   └── icons/        # 图标资源
 │   └── ui/                # UI 文件目录
 │       └── mainwindow.ui  # 主窗口界面设计文件
 ```
@@ -53,9 +57,11 @@ AuxiliaryArticalUploadTool/
 
 3. 构建项目：
    ```bash
-   # 使用自动构建脚本
-   ./rebuild.sh
+   # 使用自动构建脚本（会自动清理之前的构建）
+   ./build.sh
    ```
+
+   > 注意：每次重新构建时，脚本会自动删除 build 目录并重新构建，以确保构建环境的清洁。
 
 4. 运行应用：
    ```bash
@@ -70,7 +76,8 @@ AuxiliaryArticalUploadTool/
 ### 添加新文件
 1. 源代码文件放在 `src` 目录下
 2. UI 文件放在 `src/ui` 目录下
-3. 在 `CMakeLists.txt` 中的 `SOURCES` 变量中添加新文件
+3. 资源文件放在 `src/resources` 目录下
+4. 在 `CMakeLists.txt` 中的 `SOURCES` 变量中添加新文件
 
 ### 项目配置
 - 项目使用 CMake 构建系统
@@ -85,7 +92,8 @@ AuxiliaryArticalUploadTool/
    - 检查 CMAKE_PREFIX_PATH 是否包含 Qt 安装路径
 
 2. 构建错误
-   - 使用 `./rebuild.sh` 脚本进行完全清理和重建
+   - 使用 `./build.sh` 脚本进行完全清理和重建
+   - 确保已安装所有必要的依赖
 
 ### Windows 相关问题
 （待添加 Windows 相关问题解决方案）
