@@ -14,11 +14,11 @@ cmake ..
 make
 
 # 设置应用程序执行权限
-chmod +x QtDemo.app/Contents/MacOS/QtDemo
+chmod +x AuxiliaryArticalUploadTool.app/Contents/MacOS/AuxiliaryArticalUploadTool
 
 # 返回到原目录
 cd ..
 
 echo "重建完成!"
 echo "现在您可以通过以下方式运行程序："
-echo "open build/QtDemo.app" 
+echo "open build/AuxiliaryArticalUploadTool.app" 

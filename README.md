@@ -1,17 +1,22 @@
-# QtDemo
+# AuxiliaryArticalUploadTool
 
-一个基于 Qt 的跨平台演示项目。
+一个基于 Qt 的文章编辑和上传工具。
 
 ## 项目结构
 
 ```
-QtDemo/
+AuxiliaryArticalUploadTool/
 ├── CMakeLists.txt          # CMake 构建配置文件
 ├── README.md               # 项目说明文档
 ├── src/                    # 源代码目录
 │   ├── main.cpp           # 主程序入口
 │   ├── mainwindow.cpp     # 主窗口实现
 │   ├── mainwindow.h       # 主窗口头文件
+│   ├── editor/            # 编辑器相关代码
+│   │   ├── editorwindow.cpp
+│   │   ├── editorwindow.h
+│   │   ├── markdownpreview.cpp
+│   │   └── markdownpreview.h
 │   └── ui/                # UI 文件目录
 │       └── mainwindow.ui  # 主窗口界面设计文件
 ```
@@ -43,28 +48,18 @@ QtDemo/
 2. 克隆项目：
    ```bash
    git clone <repository-url>
-   cd QtDemo
+   cd AuxiliaryArticalUploadTool
    ```
 
 3. 构建项目：
    ```bash
-   # 创建并进入构建目录
-   mkdir build && cd build
-
-   # 配置项目
-   cmake ..
-
-   # 构建项目
-   cmake --build .
+   # 使用自动构建脚本
+   ./rebuild.sh
    ```
 
 4. 运行应用：
    ```bash
-   # 方式 1：直接运行
-   ./QtDemo.app/Contents/MacOS/QtDemo
-
-   # 方式 2：使用 open 命令
-   open QtDemo.app
+   open build/AuxiliaryArticalUploadTool.app
    ```
 
 ### Windows 构建步骤
@@ -90,14 +85,7 @@ QtDemo/
    - 检查 CMAKE_PREFIX_PATH 是否包含 Qt 安装路径
 
 2. 构建错误
-   - 清理构建目录后重试：
-     ```bash
-     rm -rf build
-     mkdir build
-     cd build
-     cmake ..
-     cmake --build .
-     ```
+   - 使用 `./rebuild.sh` 脚本进行完全清理和重建
 
 ### Windows 相关问题
 （待添加 Windows 相关问题解决方案）
