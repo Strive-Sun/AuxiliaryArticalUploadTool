@@ -13,15 +13,17 @@ public:
     void updatePreview(const QString &text);
     void syncScrollBar(int value);
 
+signals:
+    void scrollValueChanged(int percent);
+
 protected:
     void wheelEvent(QWheelEvent *event) override;
-
-signals:
-    void scrollValueChanged(int value);
+    void scrollContentsBy(int dx, int dy) override;
 
 private:
     QString convertMarkdownToHtml(const QString &markdown);
-    double calculateScrollRatio() const;
+    void emitScrollValue();
+    bool isScrolling = false;
 };
 
 #endif // MARKDOWNPREVIEW_H 
