@@ -62,12 +62,26 @@ jobs:
           -DQt6WebEngineWidgets_DIR=$QT_PATH/lib/cmake/Qt6WebEngineWidgets \
           -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
           -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
+          -DCMAKE_INSTALL_RPATH="@executable_path/../Frameworks" \
+          -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
           ..
         
     - name: Build
       run: |
         cd build
         ninja -v
+        
+    - name: Deploy Qt Dependencies
+      run: |
+        cd build
+        # 创建 Frameworks 目录
+        mkdir -p AuxiliaryArticalUploadTool.app/Contents/Frameworks
+        # 复制 Qt 框架
+        for lib in $(otool -L AuxiliaryArticalUploadTool.app/Contents/MacOS/AuxiliaryArticalUploadTool | grep $QT_PATH | cut -d' ' -f1); do
+          cp -R $(dirname $lib) AuxiliaryArticalUploadTool.app/Contents/Frameworks/
+        done
+        # 修复库路径
+        install_name_tool -add_rpath "@executable_path/../Frameworks" AuxiliaryArticalUploadTool.app/Contents/MacOS/AuxiliaryArticalUploadTool
         
     - name: List Build Directory
       run: |
@@ -92,8 +106,11 @@ jobs:
         1. 将应用拖拽到 Applications 文件夹
         2. 打开终端(Terminal.app)
         3. 运行以下命令移除应用隔离属性：
-           xattr -cr /Applications/AuxiliaryArticalUploadTool.app
-        4. 在系统偏好设置 -> 安全性与隐私 中允许打开应用
+           sudo xattr -rd com.apple.quarantine /Applications/AuxiliaryArticalUploadTool.app
+        4. 如果仍然无法打开，请运行以下命令检查权限：
+           ls -la /Applications/AuxiliaryArticalUploadTool.app/Contents/MacOS/AuxiliaryArticalUploadTool
+           chmod +x /Applications/AuxiliaryArticalUploadTool.app/Contents/MacOS/AuxiliaryArticalUploadTool
+        5. 在系统偏好设置 -> 安全性与隐私 中允许打开应用
         EOL
         
         # 创建 DMG 文件
@@ -115,9 +132,14 @@ jobs:
           2. 打开终端(Terminal.app)
           3. 运行以下命令移除应用隔离属性：
              ```bash
-             xattr -cr /Applications/AuxiliaryArticalUploadTool.app
+             sudo xattr -rd com.apple.quarantine /Applications/AuxiliaryArticalUploadTool.app
              ```
-          4. 在系统偏好设置 -> 安全性与隐私 中允许打开应用
+          4. 如果仍然无法打开，请运行以下命令检查权限：
+             ```bash
+             ls -la /Applications/AuxiliaryArticalUploadTool.app/Contents/MacOS/AuxiliaryArticalUploadTool
+             chmod +x /Applications/AuxiliaryArticalUploadTool.app/Contents/MacOS/AuxiliaryArticalUploadTool
+             ```
+          5. 在系统偏好设置 -> 安全性与隐私 中允许打开应用
 
           ### 版本说明
           - Intel (x86_64) 版本：AuxiliaryArticalUploadTool-x86_64.dmg
