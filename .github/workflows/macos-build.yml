@@ -1,0 +1,59 @@
+name: Build macOS App
+
+on:
+  push:
+    tags:
+      - 'v*'  # 当推送版本标签时触发
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '6.5.2'
+        host: 'mac'
+        target: 'desktop'
+        arch: 'clang_64'
+        
+    - name: Create Build Directory
+      run: mkdir build
+      
+    - name: Configure CMake
+      run: |
+        cd build
+        cmake ..
+        
+    - name: Build
+      run: |
+        cd build
+        make -j$(sysctl -n hw.ncpu)
+        
+    - name: Create DMG
+      run: |
+        cd build
+        # 创建临时目录用于打包
+        mkdir -p dmg_contents
+        cp -r AuxiliaryArticalUploadTool.app dmg_contents/
+        # 创建 DMG 文件
+        hdiutil create -volname "AuxiliaryArticalUploadTool" -srcfolder dmg_contents -ov -format UDZO AuxiliaryArticalUploadTool.dmg
+        
+    - name: Get Tag Name
+      id: get_tag
+      run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: build/AuxiliaryArticalUploadTool.dmg
+        name: Release ${{ env.TAG_NAME }}
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
