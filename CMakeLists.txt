@@ -28,6 +28,7 @@ set(SOURCES
     src/editor/editorwindow.h
     src/editor/markdownpreview.cpp
     src/editor/markdownpreview.h
+    src/resources/resources.qrc
 )
 
 # 创建可执行文件
@@ -55,7 +56,13 @@ if(APPLE)
         MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
         MACOSX_BUNDLE_COPYRIGHT "Copyright © 2024"
+        MACOSX_BUNDLE_ICON_FILE "app_icon.png"
     )
+    
+    # 复制图标文件到应用程序包
+    set(APP_ICON "${CMAKE_SOURCE_DIR}/src/resources/icons/app_icon.png")
+    set_source_files_properties(${APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+    target_sources(${PROJECT_NAME} PRIVATE ${APP_ICON})
 endif()
 
 # 安装规则

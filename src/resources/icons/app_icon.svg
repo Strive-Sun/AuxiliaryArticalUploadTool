@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+    <!-- 背景圆形 -->
+    <circle cx="256" cy="256" r="240" fill="#4a90e2" />
+    
+    <!-- 文档图标 -->
+    <path d="M160 80 L280 80 L360 160 L360 432 L160 432 Z" 
+          fill="white" stroke="#2c3e50" stroke-width="16"/>
+    
+    <!-- 文档折角 -->
+    <path d="M280 80 L280 160 L360 160" 
+          fill="none" stroke="#2c3e50" stroke-width="16"/>
+    
+    <!-- 上传箭头 -->
+    <path d="M260 380 L260 200 M200 260 L260 200 L320 260" 
+          fill="none" stroke="#2c3e50" stroke-width="16" stroke-linecap="round"/>
+    
+    <!-- 文档线条 -->
+    <path d="M200 240 L320 240 M200 280 L320 280 M200 320 L320 320" 
+          fill="none" stroke="#e8f0fe" stroke-width="12"/>
+</svg> 
