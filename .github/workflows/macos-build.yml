@@ -57,6 +57,7 @@ jobs:
           -DQt6WebEngine_DIR=$QT_PATH/lib/cmake/Qt6WebEngine \
           -DQt6WebEngineCore_DIR=$QT_PATH/lib/cmake/Qt6WebEngineCore \
           -DQt6WebEngineWidgets_DIR=$QT_PATH/lib/cmake/Qt6WebEngineWidgets \
+          -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
           ..
         
     - name: Build
@@ -80,6 +81,17 @@ jobs:
         # 创建临时目录用于打包
         mkdir -p dmg_contents
         cp -r AuxiliaryArticalUploadTool.app dmg_contents/
+        
+        # 创建说明文件
+        cat > dmg_contents/README.txt << EOL
+        安装说明：
+        1. 将应用拖拽到 Applications 文件夹
+        2. 打开终端(Terminal.app)
+        3. 运行以下命令移除应用隔离属性：
+           xattr -cr /Applications/AuxiliaryArticalUploadTool.app
+        4. 在系统偏好设置 -> 安全性与隐私 中允许打开应用
+        EOL
+        
         # 创建 DMG 文件
         hdiutil create -volname "AuxiliaryArticalUploadTool" -srcfolder dmg_contents -ov -format UDZO AuxiliaryArticalUploadTool.dmg
         
@@ -93,6 +105,15 @@ jobs:
       with:
         files: build/AuxiliaryArticalUploadTool.dmg
         name: Release ${{ env.TAG_NAME }}
+        body: |
+          ### 安装说明
+          1. 将应用拖拽到 Applications 文件夹
+          2. 打开终端(Terminal.app)
+          3. 运行以下命令移除应用隔离属性：
+             ```bash
+             xattr -cr /Applications/AuxiliaryArticalUploadTool.app
+             ```
+          4. 在系统偏好设置 -> 安全性与隐私 中允许打开应用
         draft: false
         prerelease: false
       env:
