@@ -74,6 +74,7 @@ jobs:
           -DCMAKE_INSTALL_RPATH="@executable_path/../Frameworks" \
           -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
           -DCMAKE_VERBOSE_MAKEFILE=ON \
+          -DCMAKE_INSTALL_PREFIX=install \
           .. 2>&1 | tee cmake_output.log
         
         echo "CMake configuration complete. Checking output..."
@@ -97,15 +98,41 @@ jobs:
           exit 1
         fi
         
+        echo "Installing application..."
+        ninja install
+        
         echo "Checking build output..."
         find . -name "*.app" -type d
+        
+    - name: Verify Executable
+      run: |
+        cd build
+        APP_PATH=$(find . -name "AuxiliaryArticalUploadTool.app" -type d)
+        if [ -z "$APP_PATH" ]; then
+          echo "Error: Could not find AuxiliaryArticalUploadTool.app"
+          exit 1
+        fi
+        
+        EXEC_PATH="$APP_PATH/Contents/MacOS/AuxiliaryArticalUploadTool"
+        echo "Checking executable at: $EXEC_PATH"
+        
+        if [ ! -f "$EXEC_PATH" ]; then
+          echo "Error: Executable file is missing"
+          exit 1
+        fi
+        
+        echo "Setting executable permissions..."
+        chmod +x "$EXEC_PATH"
+        
+        echo "Checking file type..."
+        file "$EXEC_PATH"
+        
+        echo "Checking dynamic libraries..."
+        otool -L "$EXEC_PATH"
         
     - name: Deploy Qt Dependencies
       run: |
         cd build
-        echo "Checking application location..."
-        find . -name "*.app" -type d
-        
         APP_PATH=$(find . -name "AuxiliaryArticalUploadTool.app" -type d)
         if [ -z "$APP_PATH" ]; then
           echo "Error: Could not find AuxiliaryArticalUploadTool.app"
@@ -122,6 +149,14 @@ jobs:
         # 使用 macdeployqt 部署 Qt 依赖
         echo "Deploying Qt dependencies..."
         $QT_PATH/bin/macdeployqt "$APP_PATH" -verbose=3
+        
+        # 验证部署结果
+        echo "Checking deployed frameworks:"
+        ls -la "$APP_PATH/Contents/Frameworks"
+        
+        # 检查可执行文件的链接
+        echo "Checking executable dependencies after deployment:"
+        otool -L "$APP_PATH/Contents/MacOS/AuxiliaryArticalUploadTool"
         
     - name: List Build Directory
       run: |
