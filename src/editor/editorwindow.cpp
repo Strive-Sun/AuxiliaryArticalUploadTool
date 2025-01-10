@@ -18,7 +18,7 @@ EditorWindow::EditorWindow(QWidget *parent)
     setupPreview();
 
     setCentralWidget(splitter);
-    setWindowTitle(tr("Editor"));
+    setWindowTitle(tr("文章编辑器"));
     resize(800, 600);
 }
 
@@ -222,9 +222,9 @@ void EditorWindow::setCurrentFile(const QString &fileName)
     editor->document()->setModified(false);
     
     if (fileName.isEmpty()) {
-        setWindowTitle(tr("Editor"));
+        setWindowTitle(tr("文章编辑器"));
     } else {
-        setWindowTitle(tr("%1 - %2").arg(QFileInfo(fileName).fileName(), tr("Editor")));
+        setWindowTitle(tr("%1 - %2").arg(QFileInfo(fileName).fileName(), tr("文章编辑器")));
     }
 }
 

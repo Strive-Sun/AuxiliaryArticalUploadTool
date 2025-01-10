@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     
     // 设置窗口标题和大小
-    setWindowTitle(tr("Qt Demo"));
+    setWindowTitle(tr("文章编辑上传工具"));
     resize(400, 300);
     
     // 连接打开编辑器按钮的信号
