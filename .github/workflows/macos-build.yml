@@ -11,6 +11,9 @@ permissions:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        arch: [x86_64, arm64]
     runs-on: macos-latest
     
     steps:
@@ -57,6 +60,7 @@ jobs:
           -DQt6WebEngine_DIR=$QT_PATH/lib/cmake/Qt6WebEngine \
           -DQt6WebEngineCore_DIR=$QT_PATH/lib/cmake/Qt6WebEngineCore \
           -DQt6WebEngineWidgets_DIR=$QT_PATH/lib/cmake/Qt6WebEngineWidgets \
+          -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
           -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
           ..
         
@@ -93,7 +97,7 @@ jobs:
         EOL
         
         # 创建 DMG 文件
-        hdiutil create -volname "AuxiliaryArticalUploadTool" -srcfolder dmg_contents -ov -format UDZO AuxiliaryArticalUploadTool.dmg
+        hdiutil create -volname "AuxiliaryArticalUploadTool-${{ matrix.arch }}" -srcfolder dmg_contents -ov -format UDZO "AuxiliaryArticalUploadTool-${{ matrix.arch }}.dmg"
         
     - name: Get Tag Name
       id: get_tag
@@ -103,7 +107,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: build/AuxiliaryArticalUploadTool.dmg
+        files: build/AuxiliaryArticalUploadTool-${{ matrix.arch }}.dmg
         name: Release ${{ env.TAG_NAME }}
         body: |
           ### 安装说明
@@ -114,6 +118,14 @@ jobs:
              xattr -cr /Applications/AuxiliaryArticalUploadTool.app
              ```
           4. 在系统偏好设置 -> 安全性与隐私 中允许打开应用
+
+          ### 版本说明
+          - Intel (x86_64) 版本：AuxiliaryArticalUploadTool-x86_64.dmg
+          - Apple Silicon (arm64) 版本：AuxiliaryArticalUploadTool-arm64.dmg
+          
+          请根据你的 Mac 芯片类型选择对应的版本：
+          - Intel Mac：下载 x86_64 版本
+          - M1/M2/M3 Mac：下载 arm64 版本
         draft: false
         prerelease: false
       env:

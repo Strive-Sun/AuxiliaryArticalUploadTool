@@ -245,10 +245,28 @@ $ git push origin v1.0.0
 
 ### 4. 构建产物
 - 构建完成后会在 GitHub Releases 页面创建新的发布
-- 发布包含自动构建的 DMG 安装包
-- Release 说明中包含安装步骤
+- 每次发布包含两个版本的 DMG 安装包：
+  - Intel (x86_64) 版本：适用于 Intel 芯片的 Mac
+  - Apple Silicon (arm64) 版本：适用于 M1/M2/M3 芯片的 Mac
+- Release 说明中包含安装步骤和版本选择指南
 
-### 5. 本地安装说明
+### 5. 多架构构建配置
+```yaml
+# 在 workflow 中配置多架构构建
+jobs:
+  build:
+    strategy:
+      matrix:
+        arch: [x86_64, arm64]  # 同时构建 Intel 和 ARM 版本
+    
+    steps:
+      # ... 其他步骤 ...
+      - name: Configure CMake
+        run: |
+          cmake -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} ..  # 设置目标架构
+```
+
+### 6. 本地安装说明
 ```bash
 # 1. 下载并打开 DMG 文件
 # 2. 将应用拖拽到 Applications 文件夹
@@ -258,9 +276,9 @@ $ xattr -cr /Applications/AuxiliaryArticalUploadTool.app
 # 4. 在系统偏好设置中允许打开应用
 ```
 
-### 6. 常见问题处理
+### 7. 常见问题处理
 
-#### 6.1 权限问题
+#### 7.1 权限问题
 ```yaml
 # 在 workflow 中添加权限配置
 permissions:
@@ -268,7 +286,7 @@ permissions:
   packages: write
 ```
 
-#### 6.2 Qt 依赖问题
+#### 7.2 Qt 依赖问题
 ```bash
 # 设置 Qt 环境变量
 qtpath=$(brew --prefix qt@6)
@@ -276,7 +294,7 @@ echo "QT_PATH=${qtpath}" >> $GITHUB_ENV
 echo "CMAKE_PREFIX_PATH=${qtpath}" >> $GITHUB_ENV
 ```
 
-#### 6.3 构建失败检查
+#### 7.3 构建失败检查
 ```bash
 # 查看构建日志
 # 1. 访问 GitHub 仓库的 Actions 标签页
@@ -284,9 +302,9 @@ echo "CMAKE_PREFIX_PATH=${qtpath}" >> $GITHUB_ENV
 # 3. 展开失败的步骤查看详细日志
 ```
 
-### 7. GitHub Actions 使用限制
+### 8. GitHub Actions 使用限制
 
-#### 7.1 免费账号限制
+#### 8.1 免费账号限制
 ```bash
 # 存储限制
 - 存储空间：500 MB
@@ -301,7 +319,7 @@ echo "CMAKE_PREFIX_PATH=${qtpath}" >> $GITHUB_ENV
 - GitHub API 请求：每小时 1000 次
 ```
 
-#### 7.2 查看使用情况
+#### 8.2 查看使用情况
 ```bash
 # 查看 Actions 使用情况
 # 1. 访问 GitHub 个人设置
@@ -309,7 +327,7 @@ echo "CMAKE_PREFIX_PATH=${qtpath}" >> $GITHUB_ENV
 # 3. 查看 "Actions" 部分的使用统计
 ```
 
-#### 7.3 优化建议
+#### 8.3 优化建议
 ```bash
 # 减少不必要的构建触发
 - 使用具体的分支/标签过滤器
