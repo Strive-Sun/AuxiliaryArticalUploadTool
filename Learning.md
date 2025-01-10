@@ -164,4 +164,112 @@ $ otool -L QtDemo.app/Contents/MacOS/QtDemo
 # 删除所有构建产物
 $ rm -rf build/
 $ rm -rf *.o moc_* ui_* qrc_*
+```
+
+## GitHub Actions 自动构建配置
+
+### 1. 创建工作流配置文件
+```bash
+# 创建 GitHub Actions 配置目录
+$ mkdir -p .github/workflows
+
+# 创建工作流配置文件
+$ touch .github/workflows/macos-build.yml
+
+# 注意：工作流不会自动创建，需要手动创建并编写配置文件
+# 可以通过以下两种方式之一创建：
+
+# 方式1：通过 GitHub 网页创建
+# 1. 访问你的 GitHub 仓库
+# 2. 点击 "Actions" 标签
+# 3. 点击 "New workflow"
+# 4. 选择 "set up a workflow yourself"
+# 5. 编写配置文件内容
+# 6. 点击 "Start commit" 提交配置
+
+# 方式2：本地创建（推荐）
+# 1. 在本地创建配置文件
+$ mkdir -p .github/workflows
+$ vim .github/workflows/macos-build.yml  # 或使用其他编辑器
+
+# 2. 提交并推送配置
+$ git add .github/workflows/macos-build.yml
+$ git commit -m "ci: 添加 macOS 应用自动构建工作流"
+$ git push origin develop
+```
+
+### 2. 配置自动构建流程
+```yaml
+# .github/workflows/macos-build.yml 文件内容
+name: Build macOS App
+
+on:
+  push:
+    tags:
+      - 'v*'  # 当推送版本标签时触发
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Dependencies
+        run: |
+          brew update
+          brew install cmake ninja p7zip pkg-config qt@6
+      # ... 更多步骤配置 ...
+```
+
+### 3. 触发自动构建
+```bash
+# 创建新的版本标签
+$ git tag -a v1.0.0 -m "Release version 1.0.0"
+
+# 推送标签到 GitHub，这将触发构建
+$ git push origin v1.0.0
+```
+
+### 4. 构建产物
+- 构建完成后会在 GitHub Releases 页面创建新的发布
+- 发布包含自动构建的 DMG 安装包
+- Release 说明中包含安装步骤
+
+### 5. 本地安装说明
+```bash
+# 1. 下载并打开 DMG 文件
+# 2. 将应用拖拽到 Applications 文件夹
+# 3. 移除应用隔离属性
+$ xattr -cr /Applications/AuxiliaryArticalUploadTool.app
+
+# 4. 在系统偏好设置中允许打开应用
+```
+
+### 6. 常见问题处理
+
+#### 6.1 权限问题
+```yaml
+# 在 workflow 中添加权限配置
+permissions:
+  contents: write
+  packages: write
+```
+
+#### 6.2 Qt 依赖问题
+```bash
+# 设置 Qt 环境变量
+qtpath=$(brew --prefix qt@6)
+echo "QT_PATH=${qtpath}" >> $GITHUB_ENV
+echo "CMAKE_PREFIX_PATH=${qtpath}" >> $GITHUB_ENV
+```
+
+#### 6.3 构建失败检查
+```bash
+# 查看构建日志
+# 1. 访问 GitHub 仓库的 Actions 标签页
+# 2. 点击失败的工作流
+# 3. 展开失败的步骤查看详细日志
 ``` 
