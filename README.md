@@ -32,6 +32,7 @@ AuxiliaryArticalUploadTool/
 - Qt 6.0 或更高版本（如果没有 Qt 6，将自动使用 Qt 5）
 - Xcode Command Line Tools
 - C++17 兼容的编译器（AppleClang）
+- brew（用于安装依赖）
 
 ### Windows
 （待添加 Windows 配置说明）
@@ -45,8 +46,8 @@ AuxiliaryArticalUploadTool/
    # 安装 Xcode Command Line Tools（如果尚未安装）
    xcode-select --install
 
-   # 使用 brew 安装 Qt 和 CMake（如果尚未安装）
-   brew install qt cmake
+   # 使用 brew 安装必要依赖
+   brew install cmake ninja p7zip pkg-config qt@6
    ```
 
 2. 克隆项目：
@@ -99,4 +100,43 @@ AuxiliaryArticalUploadTool/
 （待添加 Windows 相关问题解决方案）
 
 ## 许可证
-（待添加许可证信息） 
+（待添加许可证信息）
+
+## CI/CD 和发布
+
+### 自动构建流程
+项目使用 GitHub Actions 进行自动构建，支持以下功能：
+- 在推送版本标签时自动触发构建
+- 同时构建 Intel (x86_64) 和 Apple Silicon (arm64) 版本
+- 自动创建 GitHub Release 并上传构建产物
+
+### 版本发布规范
+1. 版本号格式：`v主版本.次版本.修订号`
+   - 主版本：重大更新或不兼容的 API 更改
+   - 次版本：向下兼容的功能更新
+   - 修订号：bug 修复和小改动
+
+2. 发布流程：
+   ```bash
+   # 1. 确保代码已经充分测试
+   # 2. 创建新的版本标签
+   git tag v2.0.12  # 根据实际版本号调整
+   # 3. 推送标签到远程仓库
+   git push origin v2.0.12
+   ```
+
+3. 发布产物：
+   - 每个版本会生成两个 DMG 安装包：
+     * Intel 版本：`AuxiliaryArticalUploadTool-x86_64.dmg`
+     * Apple Silicon 版本：`AuxiliaryArticalUploadTool-arm64.dmg`
+   - 用户需根据自己的 Mac 芯片类型选择对应版本
+
+### 安装说明
+1. 下载对应芯片版本的 DMG 文件
+2. 打开 DMG 文件，将应用拖拽到 Applications 文件夹
+3. 首次运行时，如果提示安全性问题：
+   ```bash
+   # 移除应用隔离属性
+   sudo xattr -rd com.apple.quarantine /Applications/AuxiliaryArticalUploadTool.app
+   ```
+4. 在系统偏好设置 -> 安全性与隐私中允许打开应用 
