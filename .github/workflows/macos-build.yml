@@ -19,29 +19,41 @@ jobs:
         brew update
         brew install cmake ninja p7zip
         brew install pkg-config
-        brew install qt@6
-        echo "Installed Qt version:"
-        qmake --version
         
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: '6.5.2'
-        host: 'mac'
-        target: 'desktop'
-        arch: 'clang_64'
-        modules: 'qtwebengine qtwebchannel qtpositioning'
+    - name: Set up Qt
+      id: qt
+      run: |
+        brew install qt@6
+        echo "Qt installation path:"
+        brew --prefix qt@6
+        qtpath=$(brew --prefix qt@6)
+        echo "QT_PATH=${qtpath}" >> $GITHUB_ENV
+        echo "CMAKE_PREFIX_PATH=${qtpath}" >> $GITHUB_ENV
+        echo "PATH=${qtpath}/bin:$PATH" >> $GITHUB_ENV
+        
+    - name: Verify Qt Installation
+      run: |
+        echo "Qt path: $QT_PATH"
+        echo "CMake prefix path: $CMAKE_PREFIX_PATH"
+        qmake6 --version
         
     - name: Create Build Directory
       run: mkdir build
       
     - name: Configure CMake
-      env:
-        CMAKE_PREFIX_PATH: ${{ steps.qt.outputs.qt_dir }}
       run: |
         cd build
-        echo "Qt installation directory: ${{ steps.qt.outputs.qt_dir }}"
-        cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ steps.qt.outputs.qt_dir }}" ..
+        cmake -GNinja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH \
+          -DQt6_DIR=$QT_PATH/lib/cmake/Qt6 \
+          -DQt6Core_DIR=$QT_PATH/lib/cmake/Qt6Core \
+          -DQt6Gui_DIR=$QT_PATH/lib/cmake/Qt6Gui \
+          -DQt6Widgets_DIR=$QT_PATH/lib/cmake/Qt6Widgets \
+          -DQt6WebEngine_DIR=$QT_PATH/lib/cmake/Qt6WebEngine \
+          -DQt6WebEngineCore_DIR=$QT_PATH/lib/cmake/Qt6WebEngineCore \
+          -DQt6WebEngineWidgets_DIR=$QT_PATH/lib/cmake/Qt6WebEngineWidgets \
+          ..
         
     - name: Build
       run: |
