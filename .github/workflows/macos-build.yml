@@ -16,8 +16,12 @@ jobs:
         
     - name: Install Dependencies
       run: |
+        brew update
         brew install cmake ninja p7zip
         brew install pkg-config
+        brew install qt@6
+        echo "Installed Qt version:"
+        qmake --version
         
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
@@ -32,18 +36,31 @@ jobs:
       run: mkdir build
       
     - name: Configure CMake
+      env:
+        CMAKE_PREFIX_PATH: ${{ steps.qt.outputs.qt_dir }}
       run: |
         cd build
-        cmake -GNinja ..
+        echo "Qt installation directory: ${{ steps.qt.outputs.qt_dir }}"
+        cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ steps.qt.outputs.qt_dir }}" ..
         
     - name: Build
       run: |
         cd build
-        ninja
+        ninja -v
+        
+    - name: List Build Directory
+      run: |
+        cd build
+        ls -la
         
     - name: Create DMG
       run: |
         cd build
+        if [ ! -d "AuxiliaryArticalUploadTool.app" ]; then
+          echo "Error: AuxiliaryArticalUploadTool.app not found"
+          ls -la
+          exit 1
+        fi
         # 创建临时目录用于打包
         mkdir -p dmg_contents
         cp -r AuxiliaryArticalUploadTool.app dmg_contents/
