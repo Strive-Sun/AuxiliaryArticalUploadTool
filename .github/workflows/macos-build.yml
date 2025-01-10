@@ -27,6 +27,7 @@ jobs:
         brew update
         brew install cmake ninja p7zip pkg-config
         brew install qt@6
+        brew install qt6-webengine
         
     - name: Set up Qt
       id: qt
@@ -42,6 +43,9 @@ jobs:
         ls -la $qtpath/lib/cmake/Qt6
         ls -la $qtpath/lib/cmake/Qt6Core
         ls -la $qtpath/lib/cmake/Qt6Widgets
+        ls -la $qtpath/lib/cmake/Qt6WebEngine
+        ls -la $qtpath/lib/cmake/Qt6WebEngineCore
+        ls -la $qtpath/lib/cmake/Qt6WebEngineWidgets
         
     - name: Verify Qt Installation
       run: |

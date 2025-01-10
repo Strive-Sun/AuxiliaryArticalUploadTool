@@ -13,9 +13,9 @@ set(CMAKE_AUTOUIC ON)
 # 设置 UI 文件目录
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/src/ui)
 
-find_package(Qt6 COMPONENTS Core Gui Widgets REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Widgets WebEngine WebEngineCore WebEngineWidgets REQUIRED)
 if(NOT Qt6_FOUND)
-    find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+    find_package(Qt5 COMPONENTS Core Gui Widgets WebEngine WebEngineCore WebEngineWidgets REQUIRED)
 endif()
 
 # 源文件
@@ -45,6 +45,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt::Core
     Qt::Gui
     Qt::Widgets
+    Qt::WebEngine
+    Qt::WebEngineCore
+    Qt::WebEngineWidgets
 )
 
 # Mac 特定设置
