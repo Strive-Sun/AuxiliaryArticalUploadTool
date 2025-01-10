@@ -14,6 +14,11 @@ jobs:
       with:
         fetch-depth: 0
         
+    - name: Install Dependencies
+      run: |
+        brew install cmake ninja p7zip
+        brew install pkg-config
+        
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
@@ -21,6 +26,7 @@ jobs:
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
+        modules: 'qtwebengine qtwebchannel qtpositioning'
         
     - name: Create Build Directory
       run: mkdir build
@@ -28,12 +34,12 @@ jobs:
     - name: Configure CMake
       run: |
         cd build
-        cmake ..
+        cmake -GNinja ..
         
     - name: Build
       run: |
         cd build
-        make -j$(sysctl -n hw.ncpu)
+        ninja
         
     - name: Create DMG
       run: |
