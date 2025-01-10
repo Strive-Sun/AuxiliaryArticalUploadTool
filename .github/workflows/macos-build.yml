@@ -14,6 +14,7 @@ jobs:
     strategy:
       matrix:
         arch: [x86_64, arm64]
+      fail-fast: false  # 允许一个架构失败时继续构建另一个
     runs-on: macos-latest
     
     steps:
@@ -24,25 +25,32 @@ jobs:
     - name: Install Dependencies
       run: |
         brew update
-        brew install cmake ninja p7zip
-        brew install pkg-config
+        brew install cmake ninja p7zip pkg-config
+        brew install qt@6
         
     - name: Set up Qt
       id: qt
       run: |
-        brew install qt@6
-        echo "Qt installation path:"
-        brew --prefix qt@6
         qtpath=$(brew --prefix qt@6)
+        echo "Qt installation path: $qtpath"
         echo "QT_PATH=${qtpath}" >> $GITHUB_ENV
         echo "CMAKE_PREFIX_PATH=${qtpath}" >> $GITHUB_ENV
         echo "PATH=${qtpath}/bin:$PATH" >> $GITHUB_ENV
+        
+        # 验证 Qt 安装
+        echo "Checking Qt installation..."
+        ls -la $qtpath/lib/cmake/Qt6
+        ls -la $qtpath/lib/cmake/Qt6Core
+        ls -la $qtpath/lib/cmake/Qt6Widgets
         
     - name: Verify Qt Installation
       run: |
         echo "Qt path: $QT_PATH"
         echo "CMake prefix path: $CMAKE_PREFIX_PATH"
+        echo "Checking Qt version:"
         qmake6 --version
+        echo "Checking Qt libraries:"
+        ls -la $QT_PATH/lib
         
     - name: Create Build Directory
       run: mkdir build
@@ -50,6 +58,7 @@ jobs:
     - name: Configure CMake
       run: |
         cd build
+        echo "Running CMake configuration..."
         cmake -GNinja \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH \
@@ -64,12 +73,29 @@ jobs:
           -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
           -DCMAKE_INSTALL_RPATH="@executable_path/../Frameworks" \
           -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
-          ..
+          -DCMAKE_VERBOSE_MAKEFILE=ON \
+          .. 2>&1 | tee cmake_output.log
+        
+        echo "CMake configuration complete. Checking output..."
+        if [ -f "CMakeFiles/CMakeError.log" ]; then
+          echo "CMake errors found:"
+          cat CMakeFiles/CMakeError.log
+        fi
         
     - name: Build
       run: |
         cd build
-        ninja -v
+        echo "Starting build process..."
+        ninja -v 2>&1 | tee build_output.log
+        
+        if [ $? -ne 0 ]; then
+          echo "Build failed. Checking error log..."
+          if [ -f "build_output.log" ]; then
+            echo "Last 50 lines of build output:"
+            tail -n 50 build_output.log
+          fi
+          exit 1
+        fi
         
     - name: Deploy Qt Dependencies
       run: |
