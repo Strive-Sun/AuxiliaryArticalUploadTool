@@ -225,12 +225,22 @@ jobs:
 ```
 
 ### 3. 触发自动构建
-```bash
-# 创建新的版本标签
-$ git tag -a v1.0.0 -m "Release version 1.0.0"
+工作流可以通过以下方式触发：
 
-# 推送标签到 GitHub，这将触发构建
+```bash
+# 方式1：推送版本标签（推荐用于正式发布）
+$ git tag -a v1.0.0 -m "Release version 1.0.0"
 $ git push origin v1.0.0
+
+# 方式2：推送到 main 分支（用于开发测试）
+$ git push origin main
+
+# 方式3：手动触发
+# 1. 访问 GitHub 仓库的 Actions 页面
+# 2. 选择 "Build macOS App" 工作流
+# 3. 点击 "Run workflow" 按钮
+# 4. 可选填写触发原因
+# 5. 点击 "Run workflow" 开始构建
 ```
 
 ### 4. 构建产物
