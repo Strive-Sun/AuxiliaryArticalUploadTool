@@ -24,6 +24,10 @@ set(SOURCES
     src/mainwindow.cpp
     src/mainwindow.h
     src/ui/mainwindow.ui
+    src/editor/editorwindow.cpp
+    src/editor/editorwindow.h
+    src/editor/markdownpreview.cpp
+    src/editor/markdownpreview.h
 )
 
 # 创建可执行文件
@@ -32,6 +36,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 # 包含目录
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/src/editor
 )
 
 # 链接 Qt 库

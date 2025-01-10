@@ -2,9 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QPushButton>
-#include <QLabel>
-#include <QVBoxLayout>
+#include "editor/editorwindow.h"
+
+QT_BEGIN_NAMESPACE
+namespace Ui { class MainWindow; }
+QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
@@ -15,13 +17,11 @@ public:
     ~MainWindow();
 
 private slots:
-    void showMessage();
+    void onOpenEditorClicked();
 
 private:
-    QPushButton *button;
-    QLabel *label;
-    QWidget *centralWidget;
-    QVBoxLayout *layout;
+    Ui::MainWindow *ui;
+    EditorWindow *editorWindow;
 };
 
 #endif // MAINWINDOW_H 

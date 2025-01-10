@@ -5,6 +5,8 @@
 #include <QTextStream>
 #include <QCloseEvent>
 #include <QApplication>
+#include <QFileInfo>
+#include <QScrollBar>
 
 EditorWindow::EditorWindow(QWidget *parent)
     : QMainWindow(parent), isPreviewVisible(false)
@@ -28,19 +30,40 @@ void EditorWindow::setupEditor()
 {
     editor = new QTextEdit;
     editor->setAcceptRichText(false);
+    editor->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     
     splitter = new QSplitter(Qt::Horizontal);
     splitter->addWidget(editor);
     
     connect(editor->document(), &QTextDocument::contentsChanged,
             this, &EditorWindow::documentWasModified);
+            
+    connect(editor->verticalScrollBar(), &QScrollBar::valueChanged,
+            this, [this](int value) {
+                if (preview && preview->isVisible() && !editor->verticalScrollBar()->signalsBlocked()) {
+                    preview->syncScrollBar(value);
+                }
+            });
 }
 
 void EditorWindow::setupPreview()
 {
-    preview = new MarkdownPreview;
+    preview = new MarkdownPreview(this);
     preview->setVisible(false);
     splitter->addWidget(preview);
+    
+    connect(preview, &MarkdownPreview::scrollValueChanged,
+            this, [this](int percent) {
+                if (editor && preview->isVisible()) {
+                    QScrollBar* editorScroll = editor->verticalScrollBar();
+                    if (!editorScroll) return;
+                    
+                    editorScroll->blockSignals(true);
+                    int targetValue = static_cast<int>(editorScroll->maximum() * (percent / 100.0));
+                    editorScroll->setValue(targetValue);
+                    editorScroll->blockSignals(false);
+                }
+            });
 }
 
 void EditorWindow::createActions()
@@ -51,7 +74,7 @@ void EditorWindow::createActions()
 
     saveAct = new QAction(tr("&Save"), this);
     saveAct->setShortcuts(QKeySequence::Save);
-    connect(saveAct, &QAction::triggered, this, &EditorWindow::saveFile);
+    connect(saveAct, &QAction::triggered, this, [this]() { saveFile(); });
 
     saveAsAct = new QAction(tr("Save &As..."), this);
     saveAsAct->setShortcuts(QKeySequence::SaveAs);
@@ -230,6 +253,7 @@ void EditorWindow::togglePreview()
     
     if (isPreviewVisible) {
         updatePreview();
+        preview->syncScrollBar(editor->verticalScrollBar()->value());
     }
 }
 
