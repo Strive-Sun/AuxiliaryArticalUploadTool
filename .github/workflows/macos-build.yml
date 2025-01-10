@@ -97,34 +97,52 @@ jobs:
           exit 1
         fi
         
+        echo "Checking build output..."
+        find . -name "*.app" -type d
+        
     - name: Deploy Qt Dependencies
       run: |
         cd build
+        echo "Checking application location..."
+        find . -name "*.app" -type d
+        
+        APP_PATH=$(find . -name "AuxiliaryArticalUploadTool.app" -type d)
+        if [ -z "$APP_PATH" ]; then
+          echo "Error: Could not find AuxiliaryArticalUploadTool.app"
+          exit 1
+        fi
+        
+        echo "Found application at: $APP_PATH"
+        echo "Checking application structure:"
+        ls -R "$APP_PATH"
+        
         # 创建 Frameworks 目录
-        mkdir -p AuxiliaryArticalUploadTool.app/Contents/Frameworks
-        # 复制 Qt 框架
-        for lib in $(otool -L AuxiliaryArticalUploadTool.app/Contents/MacOS/AuxiliaryArticalUploadTool | grep $QT_PATH | cut -d' ' -f1); do
-          cp -R $(dirname $lib) AuxiliaryArticalUploadTool.app/Contents/Frameworks/
-        done
-        # 修复库路径
-        install_name_tool -add_rpath "@executable_path/../Frameworks" AuxiliaryArticalUploadTool.app/Contents/MacOS/AuxiliaryArticalUploadTool
+        mkdir -p "$APP_PATH/Contents/Frameworks"
+        
+        # 使用 macdeployqt 部署 Qt 依赖
+        echo "Deploying Qt dependencies..."
+        $QT_PATH/bin/macdeployqt "$APP_PATH" -verbose=3
         
     - name: List Build Directory
       run: |
         cd build
         ls -la
+        echo "Checking .app contents:"
+        find . -name "*.app" -type d -exec ls -R {} \;
         
     - name: Create DMG
       run: |
         cd build
-        if [ ! -d "AuxiliaryArticalUploadTool.app" ]; then
-          echo "Error: AuxiliaryArticalUploadTool.app not found"
+        APP_PATH=$(find . -name "AuxiliaryArticalUploadTool.app" -type d)
+        if [ -z "$APP_PATH" ]; then
+          echo "Error: Could not find AuxiliaryArticalUploadTool.app"
           ls -la
           exit 1
         fi
+        
         # 创建临时目录用于打包
         mkdir -p dmg_contents
-        cp -r AuxiliaryArticalUploadTool.app dmg_contents/
+        cp -r "$APP_PATH" dmg_contents/
         
         # 创建说明文件
         cat > dmg_contents/README.txt << EOL
